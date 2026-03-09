@@ -18,7 +18,7 @@ static void Merge(char A[],int p , int q , int r){
     }
     L[n1]= INT_MAX; // sincèrement deepseek m'a dit que ça correspondait à l'infini pour un int donc c'est un sentinelle.
     R[n2]= INT_MAX;
-
+// fusionneage
     int i =0;
     int j =0; 
     for (int k = p ,k<=r,k++){
