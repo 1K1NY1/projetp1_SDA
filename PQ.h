@@ -69,7 +69,7 @@ bool pqInsert(PQ* pq, void *obj);
 void *pqGetMax(const PQ* pq);
 
 /* ------------------------------------------------------------------------- *
- * Returns the object of aximum priority currently stored in the priority 
+ * Returns the object of maximum priority currently stored in the priority 
  * queue and extracts it from the queue. The queue must contain at least
  * one object (otherwise calling the function results in an undefined behavior).
  *
