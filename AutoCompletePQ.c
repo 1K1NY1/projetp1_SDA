@@ -140,7 +140,6 @@ static int compareWeight(const void * tab, size_t i, size_t j)
 {
     //Comparaison par ordre de poids
     Term* t = (Term*)tab;
-    size_t comp = 0;
     if(t[i].weight < t[j].weight)
             return -1;
     if(t[i].weight > t[j].weight)
@@ -171,5 +170,5 @@ static void swap(void *array, size_t i, size_t j)
     Term temp = t[i];
     t[i] = t[j];
     t[j] = temp;
-    return 0;
+    return;
 }
