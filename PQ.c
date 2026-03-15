@@ -55,36 +55,93 @@ bool pqInsert(PQ* pq, void *obj){
 void *pqGetMax(const PQ* pq)
 {
     if(!pq) return NULL;
-    size_t ind = pq->size;
-    pq->size++;
-    while (ind>0)
-    {
-        size_t ind_parent = (ind-1)/2;
-        if(compare(pq->data[ind],pq->data[ind_parent]))
-        {
-            
-        }
-    }
+    //on va aller regarder dans l'arbre l'indice de la valeur la plus grande
+    return pq->data[0]; 
     
 }
 
 void *pqExtractMax(PQ* pq)
 {
-
+     if(!pq) return NULL;
+        // on va sauvegarder la valeur max du tableau 
+    void *max = pq->data[0];
+     // on va prendre le dernier element du tas et le mettre en haut du tas
+     pq->data[0]=pq->data[pq->size-1];
+     // on décremente le tas 
+     pq->size = pq->size-1;
+    size_t i = 0;// l'indice du  parent
+    while(true)
+    {
+    size_t gauche = 2*i+1;// l'indice de la gauche
+    size_t droite =2*i+2;//l'indice de la droite
+    size_t max = i;
+    //si gauche est plus grand que le max_actuel, on les échanges
+    if(gauche < pq->size && pq->compare(pq->data[gauche],pq->data[max])>0)
+    {
+        max = gauche;
+    }
+    //si droite est plus grand que le max_actuel, on les échanges
+    if(droite < pq->size && pq->compare(pq->data[droite],pq->data[max])>0)
+    {
+        max = doite;
+    }
+    // puisque max n'est plus le max_actuel ,on échange et on continue à descendre
+    if(max !=i){
+        void *temp = pq->data[i];
+        pq->data[i]=pq->data[max];
+        pq->data[max]=temp;
+        i=max;
+    }else //sinon l'élement est à sa place, on arrête !
+    {
+        break;
+    }
+    }
+    return max;
 }
 
 void pqReplaceMax(PQ *pq, void *obj)
 {
+    if(!pq) return NULL;
+    pq->data[0] = obj;
+    //si l'objet est plus petit que ces précedents on réarrange
+    size_t i =0 ;
+    while (true)
+    {
+        size_t gauche = 2 * i + 1;
+        size_t droite = 2 * i + 2;
+        size_t max = i;
+
+        if (gauche < pq->size && pq->compare(pq->data[gauche], pq->data[max]) > 0) {
+            max = gauche;
+        }
+
+        if (droite < pq->size && pq->compare(pq->data[droite], pq->data[max]) > 0) {
+            max = droite;
+        }
+
+        if (max != i) {
+            void *temp = pq->data[i];
+            pq->data[i] = pq->data[max];
+            pq->data[max] = temp;
+            i = max;
+        } else {
+            break; // L'objet a trouvé sa place !
+        }
+    }    
 
 }
 
 
 size_t pqSize(const PQ* pq)
 {
-
+    if (pq == NULL)
+    {
+        return 0;
+    }return pq->size;
 }
 
 size_t pqCapacity(const PQ* pq)
 {
-
+    if (pq==NULL) return 0;
+    return pq->capacity;
 }
