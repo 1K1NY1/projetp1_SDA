@@ -16,7 +16,7 @@ static void swap(void *array, size_t i, size_t j);
 
 struct AC_t {
     TermArray *ta;
-    bool sorted; //definis si le tableau est deja trié par ordre lexicographique
+    char sorted; //definis si le tableau est deja trié par ordre lexicographique
 };
 
 AC *acCreate(TermArray *ta)
@@ -29,7 +29,7 @@ AC *acCreate(TermArray *ta)
 	}
 
 	ac->ta = ta;
-    ac->sorted = false;
+    ac->sorted = 0;
 
     return ac;
 }
@@ -63,7 +63,7 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
     void* arr = ac->ta->array;
     size_t length = ac->ta->length;
    //Tri par ordre lexicographique
-    if(!ac->sorted)
+    if(ac->sorted == 0)
         sort(arr,length , compareTerm, swap);
     ac->sorted = 1;
     
