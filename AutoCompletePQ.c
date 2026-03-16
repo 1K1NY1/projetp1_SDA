@@ -8,7 +8,6 @@
 #include "AutoComplete.h"
 #include "PQ.h"
 
-static int compareWeight(const void * tab, size_t i, size_t j);
 static int compareTerm(const void * tab, size_t i, size_t j);
 static int compareKey(const void * tab, size_t i, void* key);
 static int comparePriority(const void * p1,const void * p2);
@@ -80,7 +79,8 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
     
     for(size_t i = 1; i < s_length; i++)
     {
-        if(suffixs[i].weight >((Term*)pqGetMax)->weight)
+        
+        if(suffixs[i].weight >((Term*)pqGetMax(pq))->weight)
         {
             pqReplaceMax(pq,&suffixs[i]);
             continue;
@@ -136,16 +136,7 @@ static int compareTerm(const void * tab, size_t i, size_t j)
     }
     return 0;
 }
-static int compareWeight(const void * tab, size_t i, size_t j)
-{
-    //Comparaison par ordre de poids
-    Term* t = (Term*)tab;
-    if(t[i].weight < t[j].weight)
-            return -1;
-    if(t[i].weight > t[j].weight)
-            return 1;
-    return 0;
-}
+
 static int compareKey(const void * tab, size_t i, void* key)
 {
     //Comparaison par ordre lexicographique (un terme et la clé)
