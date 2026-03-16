@@ -7,7 +7,9 @@
 #include "BinarySearch.h"
 #include "AutoComplete.h"
 
-static void compare(const void * tab, size_t i, void * key);
+static int compareWeight(const void * tab, size_t i, size_t j);
+static int compareTerm(const void * tab, size_t i, size_t j);
+static int compareKey(const void * tab, size_t i, void* key);
 static void swap(void *array, size_t i, size_t j);
 
 struct AC_t {
@@ -94,7 +96,6 @@ static int compareWeight(const void * tab, size_t i, size_t j)
 {
     //Comparaison par ordre de poids (décroissant)
     Term* t = (Term*)tab;
-    size_t comp = 0;
     if(t[i].weight > t[j].weight)
             return -1;
     if(t[i].weight < t[j].weight)
@@ -125,5 +126,5 @@ static void swap(void *array, size_t i, size_t j)
     Term temp = t[i];
     t[i] = t[j];
     t[j] = temp;
-    return 0;
+    return;
 }
