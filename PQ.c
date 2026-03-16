@@ -15,18 +15,19 @@ PQ *pqCreate(size_t capacity, int (*compare)(const void *, const void *)){
     if (!pq) return NULL;
     pq->data = malloc(capacity *sizeof(void*));
     if (!(pq->data))
-    {free(pq);}
-    return NULL;
+    {free(pq);
+    return NULL;}
     
     pq->capacity = capacity;
     pq->size=size;
     pq->compare = compare;
+    return pq;
 }
 
 void pqFree(PQ* pq){
-    if (pq!=NULL)
+    if (pq!=NULL){
         free(pq->data);
-        free(pq);
+        free(pq);}
 }
 bool pqInsert(PQ* pq, void *obj){
     if (pq->size == pq->capacity)
@@ -46,12 +47,13 @@ bool pqInsert(PQ* pq, void *obj){
             temp = pq->data[i];
             pq->data[i]=pq->data[i_parent];
             pq->data[i_parent]=temp;
+            i = i_parent; // on monte l'indice
         }else {break;}
-        
+      return true;  
     }
-    return true;
+    
 
-}
+
 
 void *pqGetMax(const PQ* pq)
 {
@@ -84,7 +86,7 @@ void *pqExtractMax(PQ* pq)
     //si droite est plus grand que le max_actuel, on les échanges
     if(droite < pq->size && pq->compare(pq->data[droite],pq->data[max])>0)
     {
-        max = doite;
+        max = droite;
     }
     // puisque max n'est plus le max_actuel ,on échange et on continue à descendre
     if(max !=i){
@@ -102,7 +104,7 @@ void *pqExtractMax(PQ* pq)
 
 void pqReplaceMax(PQ *pq, void *obj)
 {
-    if(!pq) return NULL;
+    if(!pq) return;
     pq->data[0] = obj;
     //si l'objet est plus petit que ces précedents on réarrange
     size_t i =0 ;
