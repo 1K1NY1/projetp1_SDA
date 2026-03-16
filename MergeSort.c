@@ -40,7 +40,17 @@ static void merge(int *tab_indices, size_t p, size_t q, size_t r, void *tableau,
     free(L); 
     free(R);
 }
-
+/*Cette fonction divise le tableau en deux moitiés jusqu'à n'avoir que des éléments isolés (p >= r), 
+puis elle remonte la récursion en fusionnant les morceaux via 'merge' pour reconstruire le tableau trié. */
+static void merge_sort(int *tab_indices, size_t p, size_t r, void *tableau,
+                                 int (*compare)(const void *, size_t, size_t)) {
+    if (p < r) {
+        size_t q = p + (r - p) / 2; 
+        merge_sort(tab_indices, p, q, tableau, compare);
+        merge_sort(tab_indices, q + 1, r, tableau, compare);
+        merge(tab_indices, p, q, r, tableau, compare);
+    }
+}
 void sort(void *tableau, size_t length,
           int (*compare)(const void *, size_t i, size_t j),
           void (*swap)(void *tableau, size_t i, size_t j)) {
@@ -55,7 +65,7 @@ Sinon, on alloue et on remplit un tableau d'indices qui servira de base pour tri
     for (size_t i = 0; i < length; i++) {
         tab_indices[i] = (int)i;
     }
-    
+
     merge_sort(tab_indices, 0, length - 1, tableau, compare);
 
     /* On parcourt le tableau d'indices triés et on déplace physiquement les données 
@@ -76,15 +86,5 @@ Sinon, on alloue et on remplit un tableau d'indices qui servira de base pour tri
     free(tab_indices);
 }
 
-/*Cette fonction divise le tableau en deux moitiés jusqu'à n'avoir que des éléments isolés (p >= r), 
-puis elle remonte la récursion en fusionnant les morceaux via 'merge' pour reconstruire le tableau trié. */
-static void merge_sort(int *tab_indices, size_t p, size_t r, void *tableau,
-                                 int (*compare)(const void *, size_t, size_t)) {
-    if (p < r) {
-        size_t q = p + (r - p) / 2; 
-        merge_sort(tab_indices, p, q, tableau, compare);
-        merge_sort(tab_indices, q + 1, r, tableau, compare);
-        merge(tab_indices, p, q, r, tableau, compare);
-    }
-}
+
 
