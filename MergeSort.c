@@ -9,9 +9,9 @@ static void merge(int *tab_indices, size_t p, size_t q, size_t r, void *tableau,
     size_t n2 = r - q;
 
     int *L = malloc(n1 * sizeof(int));
-    if (L == NULL) return NULL;
+    if (L == NULL) return ;
     int *R = malloc(n2 * sizeof(int));
-     if (L == NULL) return NULL;
+     if (R == NULL) return ;
 
     //on sépare le tableaux des indices en 2 avec L[i] qui corespond à la partie à gauche du tableaux de départ et R[j] qui correspond aux tableaux de gauche.
     for (size_t i = 0; i < n1; i++){
@@ -40,26 +40,34 @@ static void merge(int *tab_indices, size_t p, size_t q, size_t r, void *tableau,
     free(L); 
     free(R);
 }
-/*  Si le tableau contient moins de 2 éléments, aucun tri n'est nécessaire.
-Sinon, on alloue et on remplit un tableau d'indices qui servira de base pour trier les éléments sans déplacer les données réelles immédiatement. */
+
 void sort(void *tableau, size_t length,
           int (*compare)(const void *, size_t i, size_t j),
           void (*swap)(void *tableau, size_t i, size_t j)) {
     
     if (length < 2) return;
-
+/*  Si le tableau contient moins de 2 éléments, aucun tri n'est nécessaire.
+Sinon, on alloue et on remplit un tableau d'indices qui servira de base pour trier les éléments sans déplacer les données réelles immédiatement. */
     int *tab_indices = malloc(length * sizeof(int));
-    for (size_t i = 0; i < length; i++)
-    {tab_indices[i] = i};
-    /*On parcourt le tableau d'indices triés et on déplace physiquement les données dans 'tableau' via la fonction 'swap'. Tant qu'un index n'est pas 
-   à sa place, on échange l'élément actuel avec sa cible finale jusqu'à ce que tout soit aligné, puis on libère la mémoire.*/
-    for (size_t i = 0; i < length; i++){
-        /*on met des paranthèses sur le int avant le i pour dire que le i devient un entier*/
+    if(!tab_indices) return;
+
+    // Remplissage du tableau d'indices
+    for (size_t i = 0; i < length; i++) {
+        tab_indices[i] = (int)i;
+    }
+    
+    merge_sort(tab_indices, 0, length - 1, tableau, compare);
+
+    /* On parcourt le tableau d'indices triés et on déplace physiquement les données 
+       dans 'tableau' via la fonction 'swap'. Tant qu'un index n'est pas à sa place, 
+       on échange l'élément actuel avec sa cible finale. */
+    for (size_t i = 0; i < length; i++) {
         while (tab_indices[i] != (int)i) {
             int cible = tab_indices[i];
 
             swap(tableau, i, (size_t)cible);
 
+            // Mise à jour du tableau d'indices pour suivre le swap physique
             int temp = tab_indices[i];
             tab_indices[i] = tab_indices[cible];
             tab_indices[cible] = temp;
