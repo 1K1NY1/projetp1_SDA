@@ -12,10 +12,13 @@ static int compareTerm(const void * tab, size_t i, size_t j);
 static int compareKey(const void * tab, size_t i, void* key);
 static void swap(void *array, size_t i, size_t j);
 
+
 struct AC_t {
     TermArray *ta;
-    TermArray *SearchArray; //contient les m éléments de la recherche
+    char sorted;
 };
+
+
 
 AC *acCreate(TermArray *ta)
 {
@@ -27,7 +30,7 @@ AC *acCreate(TermArray *ta)
 	}
 
 	ac->ta = ta;
-
+    ac->sorted = 0;
     return ac;
 }
 
@@ -43,21 +46,55 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
     2) determination des m premiers termes dont la requête est un prefixe (recherche binaire)
     3) tri de cette liste de terme par ordre de points
     */
+   ///
+
+   //debug 
+    /*
+    FILE *logFile = fopen("retour.log", "a");
+    if (logFile == NULL) {
+        perror("Impossible d'ouvrir le fichier log");
+        return 1;
+    }
+    freopen("debug.log", "a", stderr);
+    //-----------------------------------------------------
+    fprintf(logFile, "Nouvelle entrée\n");
+    //-----------------------------------------------------
+    */
+
+
+    
     void* arr = ac->ta->array;
     size_t length = ac->ta->length;
-   //Tri par ordre lexicographique
-    sort(arr,length , compareTerm, swap);
-
+    //Tri par ordre lexicographique
+    if(ac->sorted == 0)
+    {
+        //fprintf(logFile, "Je trie pour la première fois\n");
+        sort(arr,length , compareTerm, swap);
+        ac->sorted = 1;
+    }
+    
+    //-----------------------------------------------------
+    //fprintf(logFile, "Tri OK\n");
+    //-----------------------------------------------------
     //détermination des m premiers terme suffixe
     size_t first = binarySearchLow(arr,length,query,compareKey);
     size_t last = binarySearchHigh(arr,length,query,compareKey);
+    if(first > last)
+        return 0;
+    if(first == last)
+        if(compareKey(arr,first,query) != 0) //si pas de clé dans le tableau
+            return 0;
+    //fprintf(logFile, "La recherche m'a amené à %ld et %ld\n",first,last);
+    //-----------------------------------------------------
+    //fprintf(logFile, "m premiers terme trouvé\n");
+    //-----------------------------------------------------
 
     //tableau de travail contenant les m termes:
     size_t s_length = (last-first+1);
     Term* suffixs = malloc(sizeof(Term)* s_length);
     if(!suffixs)
     {
-        fprintf(stderr, "Erreur malloc: suffixs\n");
+        //fprintf(stderr, "Erreur malloc: suffixs\n");
 		exit(1);
     }
     for(size_t i = 0; i < s_length; i++)
@@ -65,6 +102,9 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
 
     //Tri des poids
     sort(suffixs,s_length , compareWeight, swap);
+    //-----------------------------------------------------
+    //fprintf(logFile, "Tri des poids\n");
+    //-----------------------------------------------------
 
     //remplissage de result
     size_t size  = 0;
@@ -73,6 +113,10 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
         results[size] = suffixs[size].text;
     }
     free(suffixs);
+    //-----------------------------------------------------
+    //fprintf(logFile, "Fin\n");
+    //-----------------------------------------------------
+    //fclose(logFile);
     return size;
 }
 
@@ -87,9 +131,13 @@ static int compareTerm(const void * tab, size_t i, size_t j)
             return -1;
         if(t[i].text[comp] > t[j].text[comp])
             return 1;
-        //sinon égaux : potentiel problème si pas la même taille (ici il ne se passera rien, on considère qu'il seront égaux)
+        
         comp++;
     }
+    if (t[i].text[comp] != '\0' && t[j].text[comp] == '\0')
+     return -1;
+    if (t[i].text[comp] == '\0' && t[j].text[comp] != '\0')
+     return 1;
     return 0;
 }
 static int compareWeight(const void * tab, size_t i, size_t j)
@@ -114,10 +162,12 @@ static int compareKey(const void * tab, size_t i, void* key)
             return -1;
         if(t[i].text[comp] > string_key[comp])
             return 1;
-        //sinon égaux : potentiel problème si pas la même taille (ici il ne se passera rien, on considère qu'il seront égaux)
+        
         comp++;
     }
-    return 0;
+    if (string_key[comp] == '\0') //match
+        return 0;
+    return -1; //texte terminé mais pas la clé
 }
 static void swap(void *array, size_t i, size_t j)
 {
