@@ -63,8 +63,7 @@ static void merge(size_t *tab_indices, size_t start, size_t mid, size_t end, voi
     free(L); 
     free(R);
 }
-/*  Si le tableau contient moins de 2 éléments, aucun tri n'est nécessaire.
-Sinon, on alloue et on remplit un tableau d'indices qui servira de base pour trier les éléments sans déplacer les données réelles immédiatement. */
+
 void sort(void *tableau, size_t length,
           int (*compare)(const void *, size_t i, size_t j),
           void (*swap)(void *tableau, size_t i, size_t j)) {
