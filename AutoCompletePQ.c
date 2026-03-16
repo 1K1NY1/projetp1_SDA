@@ -16,7 +16,7 @@ static void swap(void *array, size_t i, size_t j);
 
 struct AC_t {
     TermArray *ta;
-    TermArray *SearchArray; //contient les m éléments de la recherche
+    bool sorted; //definis si le tableau est deja trié par ordre lexicographique
 };
 
 AC *acCreate(TermArray *ta)
@@ -29,6 +29,7 @@ AC *acCreate(TermArray *ta)
 	}
 
 	ac->ta = ta;
+    ac->sorted = false;
 
     return ac;
 }
@@ -45,17 +46,46 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
     2) determination des m premiers termes dont la requête est un prefixe (recherche binaire)
     3) file à priorité
     */
+    /*
+    FILE *logFile = fopen("retour.log", "a");
+    if (logFile == NULL) {
+        perror("Impossible d'ouvrir le fichier log");
+        return 1;
+    }
+    freopen("debug.log", "a", stderr);*/
+    //-----------------------------------------------------
+    //fprintf(logFile, "Nouvelle entrée\n");
+    //-----------------------------------------------------
+
+
+
+    
     void* arr = ac->ta->array;
     size_t length = ac->ta->length;
    //Tri par ordre lexicographique
-    sort(arr,length , compareTerm, swap);
-
+    if(!ac->sorted)
+        sort(arr,length , compareTerm, swap);
+    ac->sorted = 1;
+    
     //détermination des m premiers terme suffixe
-    size_t first = binarySearchLow(arr,length,query,compareKey);
-    size_t last = binarySearchHigh(arr,length,query,compareKey);
-
+    size_t first = 0;
+    size_t last = length-1;
+    if(query == NULL || *query != '\0') //optimise le temps si recherche vide
+    {
+        first = binarySearchLow(arr,length,query,compareKey);
+        last = binarySearchHigh(arr,length,query,compareKey);
+    }   
+    if(first > last)
+        return 0;
+    if(first == last)
+        if(compareKey(arr,first,query) != 0) //si pas de clé dans le tableau
+            return 0;
+    //fprintf(logFile, "First: %ld, Last: %ld\n",first,last);
     //tableau de travail contenant les m termes:
     size_t s_length = (last-first+1);
+    //fprintf(logFile, "s_length: %ld\n",s_length);
+    if(s_length <= 0) //evite des potentiels problemes
+        return 0;
     Term* suffixs = malloc(sizeof(Term)* s_length);
     if(!suffixs)
     {
@@ -76,18 +106,18 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
 
     //initialisation
     pqInsert(pq,&suffixs[0]);
-    
+    //fprintf(logFile, "Remplissage de la pq\n");
     for(size_t i = 1; i < s_length; i++)
     {
         
-        if(suffixs[i].weight >((Term*)pqGetMax(pq))->weight)
+        if(pqInsert(pq,&suffixs[i]) == false) //insère si on n'y arrive pas soit on remplace le max, so
         {
-            pqReplaceMax(pq,&suffixs[i]);
-            continue;
-        }
-        if(pqInsert(pq,&suffixs[i]) == false)
-        {
-            break;
+            //fprintf(logFile, "Plus de place \n");
+            if(suffixs[i].weight > ((Term*)pqGetMax(pq))->weight) //remplace par un meilleur terme
+            {
+                //fprintf(logFile, "Je remplace un poids de %ld par %ld \n",((Term*)pqGetMax(pq))->weight,suffixs[i].weight);
+                pqReplaceMax(pq,&suffixs[i]);
+            }
         }
 
         
@@ -106,17 +136,17 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
     }
     free(suffixs);
     pqFree(pq);
+    //fclose(logFile);
     return a;
 }
 static int comparePriority(const void * Term1,const void * Term2)
 {
     Term* t1 = (Term*)Term1;
     Term* t2 = (Term*)Term2;
-    long p1 = 1/t1->weight;
-    long p2 = 1/t2->weight;
-    if(p1 > p2)
+    //(1/t1) < (1/t2) => t1 > t2
+    if(t1->weight < t2->weight)
         return 1;
-    if(p1 < p2)
+    if(t1->weight > t2->weight)
         return -1;
     return 0;
 }
@@ -131,12 +161,15 @@ static int compareTerm(const void * tab, size_t i, size_t j)
             return -1;
         if(t[i].text[comp] > t[j].text[comp])
             return 1;
-        //sinon égaux : potentiel problème si pas la même taille (ici il ne se passera rien, on considère qu'il seront égaux)
+        
         comp++;
     }
+    if (t[i].text[comp] != '\0' && t[j].text[comp] == '\0')
+     return -1;
+    if (t[i].text[comp] == '\0' && t[j].text[comp] != '\0')
+     return 1;
     return 0;
 }
-
 static int compareKey(const void * tab, size_t i, void* key)
 {
     //Comparaison par ordre lexicographique (un terme et la clé)
@@ -149,10 +182,12 @@ static int compareKey(const void * tab, size_t i, void* key)
             return -1;
         if(t[i].text[comp] > string_key[comp])
             return 1;
-        //sinon égaux : potentiel problème si pas la même taille (ici il ne se passera rien, on considère qu'il seront égaux)
+        
         comp++;
     }
-    return 0;
+    if (string_key[comp] == '\0') //match
+        return 0;
+    return -1; //texte terminé mais pas la clé
 }
 static void swap(void *array, size_t i, size_t j)
 {

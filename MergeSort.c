@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "sort.h"
+#include "Sort.h"
 
 static void merge_sort(size_t *tab_indices, size_t start, size_t end, void *tableau,
                                  int (*compare)(const void *, size_t, size_t)) ;
