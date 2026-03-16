@@ -14,7 +14,8 @@ PQ *pqCreate(size_t capacity, int (*compare)(const void *, const void *)){
     PQ *pq= malloc(sizeof(PQ));
     if (!pq) return NULL;
     pq->data = malloc(capacity *sizeof(void*));
-    if (!(pq->data)){free(pq);}
+    if (!(pq->data))
+    {free(pq);}
     return NULL;
     
     pq->capacity = capacity;
@@ -28,8 +29,8 @@ void pqFree(PQ* pq){
         free(pq);
 }
 bool pqInsert(PQ* pq, void *obj){
-    if (pq->size == pq->capacity){
-    return false;}
+    if (pq->size == pq->capacity)
+     {return false;}
     ///ici on va mettre l'objet dans le bas du tas
     size_t i = pq->size;
     pq->data[i] = obj;
@@ -38,15 +39,15 @@ bool pqInsert(PQ* pq, void *obj){
     void *temp;
     while(i>0)
     {
+        void *temp;
         size_t i_parent = (i-1)/2;
     
-        if (compare(pq->data[i],pq->data[i_parent]) <0)
-        {
+        if (pq->compare(pq->data[i],pq->data[i_parent]) >0)//si la valeur fils est plus grand que la valeur parent, on les échange.        {
             temp = pq->data[i];
-            pq->data[i_parent]=pq->data[i];
-            pq->data[i]=temp;
+            pq->data[i]=pq->data[i_parent];
+            pq->data[i_parent]=temp;
         }else {break;}
-        i = i_parent;
+        
     }
     return true;
 
