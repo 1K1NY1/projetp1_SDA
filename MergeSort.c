@@ -63,17 +63,7 @@ static void merge(size_t *tab_indices, size_t start, size_t mid, size_t end, voi
     free(L); 
     free(R);
 }
-/*Cette fonction divise le tableau en deux moitiés jusqu'à n'avoir que des éléments isolés (p >= r), 
-puis elle remonte la récursion en fusionnant les morceaux via 'merge' pour reconstruire le tableau trié. */
-static void merge_sort(int *tab_indices, size_t p, size_t r, void *tableau,
-                                 int (*compare)(const void *, size_t, size_t)) {
-    if (p < r) {
-        size_t q = p + (r - p) / 2; 
-        merge_sort(tab_indices, p, q, tableau, compare);
-        merge_sort(tab_indices, q + 1, r, tableau, compare);
-        merge(tab_indices, p, q, r, tableau, compare);
-    }
-}
+
 void sort(void *tableau, size_t length,
           int (*compare)(const void *, size_t i, size_t j),
           void (*swap)(void *tableau, size_t i, size_t j)) {
@@ -118,30 +108,6 @@ void sort(void *tableau, size_t length,
         }
         
     }
-<<<<<<< HEAD
-
-    merge_sort(tab_indices, 0, length - 1, tableau, compare);
-
-    /* On parcourt le tableau d'indices triés et on déplace physiquement les données 
-       dans 'tableau' via la fonction 'swap'. Tant qu'un index n'est pas à sa place, 
-       on échange l'élément actuel avec sa cible finale. */
-    for (size_t i = 0; i < length; i++) {
-        while (tab_indices[i] != (int)i) {
-            int cible = tab_indices[i];
-
-            swap(tableau, i, (size_t)cible);
-
-            // Mise à jour du tableau d'indices pour suivre le swap physique
-            int temp = tab_indices[i];
-            tab_indices[i] = tab_indices[cible];
-            tab_indices[cible] = temp;
-        }
-    }
-    free(tab_indices);
-}
-
-
-=======
     
     free(tab_indices);
 }
@@ -157,5 +123,6 @@ static void merge_sort(size_t *tab_indices, size_t start, size_t end, void *tabl
         merge(tab_indices, start, mid, end, tableau, compare);
     }
 }
->>>>>>> 7954da6d0862596f46f92617882c171751f67e9d
+
+
 
