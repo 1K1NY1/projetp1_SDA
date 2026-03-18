@@ -33,7 +33,7 @@ void acFree(AC *ac)
 size_t acComplete(AC *ac, char *query, size_t k, char **results)
 {
     size_t posinresults = 0;
-	for (size_t i = 0; i < ac->ta->length & posinresults < k; i++)
+	for (size_t i = 0; i < ac->ta->length && posinresults < k; i++)
 	{
         char *termtext = ac->ta->array[i].text;
         size_t j = 0;
