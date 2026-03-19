@@ -77,8 +77,13 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
     //fprintf(logFile, "Tri OK\n");
     //-----------------------------------------------------
     //détermination des m premiers terme suffixe
-    size_t first = binarySearchLow(arr,length,query,compareKey);
-    size_t last = binarySearchHigh(arr,length,query,compareKey);
+    size_t first = 0;
+    size_t last = length-1;
+    if(query == NULL || *query != '\0') //optimise le temps si recherche vide
+    {
+        first = binarySearchLow(arr,length,query,compareKey);
+        last = binarySearchHigh(arr,length,query,compareKey);
+    } 
     if(first > last)
         return 0;
     if(first == last)
