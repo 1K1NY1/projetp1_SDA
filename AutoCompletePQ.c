@@ -16,6 +16,7 @@ static void swap(void *array, size_t i, size_t j);
 
 struct AC_t {
     TermArray *ta;
+    char** WeightSorted;
     char sorted; //definis si le tableau est deja trié par ordre lexicographique
 };
 
@@ -27,8 +28,20 @@ AC *acCreate(TermArray *ta)
 		fprintf(stderr, "acCreate: allocation error.\n");
 		exit(1);
 	}
-
+    char** initial = malloc(sizeof(char*)*ta->length);
+    if(!initial){
+		fprintf(stderr, "acCreate: allocation error for initial.\n");
+        free(ac);
+		exit(1);
+	}
+    //recopiage du tableau initial
+    for(size_t i = 0; i < ta->length; i++)
+    {
+        initial[i] = ta->array[i].text;
+    }
+    
 	ac->ta = ta;
+    ac->WeightSorted = initial;
     ac->sorted = 0;
 
     return ac;
@@ -66,15 +79,23 @@ size_t acComplete(AC *ac, char *query, size_t k, char **results)
     if(ac->sorted == 0)
         sort(arr,length , compareTerm, swap);
     ac->sorted = 1;
-    
+    //Si recherche vide on reprends le tableau déjà trié
+    if(query == NULL || *query == '\0') //optimise le temps si recherche vide (supposé que les éléments sont déjà trié par ordre de poids)
+    {
+        size_t i = 0;
+        for(; i < k && i < length; i++)
+            results[i] = ac->WeightSorted[i];
+        return i;
+    } 
+
     //détermination des m premiers terme suffixe
     size_t first = 0;
     size_t last = length-1;
-    if(query == NULL || *query != '\0') //optimise le temps si recherche vide
-    {
-        first = binarySearchLow(arr,length,query,compareKey);
-        last = binarySearchHigh(arr,length,query,compareKey);
-    }   
+    
+    first = binarySearchLow(arr,length,query,compareKey);
+    last = binarySearchHigh(arr,length,query,compareKey);
+    
+    
     if(first > last)
         return 0;
     if(first == last)
